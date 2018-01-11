@@ -1,5 +1,7 @@
 import $ from 'jquery';
 import idb from 'idb';
+import 'bootstrap';
+import './index.html';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/style.css';
 import { debounce } from './helper';
@@ -17,8 +19,6 @@ $(() => {
 	worker.onmessage = (e) => {
 		console.log(e.data);
 	};
-	// url to fetch JSON Obj
-	const fetchUrl = 'http://localhost/apester/src/gallery-data.json';
 	// creates images and appends to the DOM
 	const imageCreator = (index, data, webWorker) => {
 		for (let i = index; i < index + 15; i++) {
@@ -39,10 +39,11 @@ $(() => {
 			}
 		}
 	};
-	// Loads the images with an ajax request from gallery-data.json
-	// gets index from index counter and updates it
-	const loadImages = (url, index, webWorker) => {
-		fetch(url)
+	// Loads the images from gallery-data.json
+	// gets index from store.indexValue and updates it
+	const loadImages = (index, webWorker) => {
+		const json = require('./gallery-data.json');
+		fetch(json)
 		.then(res => res.json())
 		.then((data) => {
 			imageCreator(index, data, webWorker);
@@ -51,6 +52,9 @@ $(() => {
 			throw new Error(err);
 		});
 	};
+	// const loadImages = (index, webWorker) => {
+	// 	imageCreator(index, json, webWorker);
+	// };
 	// gets data from db and sends to imageCreator function
 	const loadFromLocal = (index) => {
 		const dbPromise = idb.open('imagesDB', 1, () => {});
@@ -61,7 +65,7 @@ $(() => {
 		}).then((data) => {
 			imageCreator(index, data);
 		}).catch(() => {
-			console.log('No more images load more from Ajax');
+			console.log('No more images load more from JSON');
 		});
 	};
 	// checks if the user scrolled down enough to load additional images
@@ -71,22 +75,22 @@ $(() => {
 			if (store.mode === 'local') {
 				loadFromLocal(store.indexValue);
 			}
-			if (store.mode === 'ajax') {
-				loadImages(fetchUrl, store.indexValue, worker);
+			if (store.mode === 'json') {
+				loadImages(store.indexValue, worker);
 			}
 		}
 	};
-	// loads from DB instead of Ajax
+	// loads from DB instead of JSON
 	const loadOffline = () => {
 		store.mode = 'local';
 		$(window).scroll(debounce(viewport));
 		loadFromLocal(store.indexValue);
 	};
-	// loads from Ajax request instead of db
-	const loadAjax = () => {
-		store.mode = 'ajax';
+	// loads from JSON request instead of db
+	const loadJSON = () => {
+		store.mode = 'json';
 		$(window).scroll(debounce(viewport));
-		loadImages(fetchUrl, store.indexValue, worker);
+		loadImages(store.indexValue, worker);
 	};
 	// empties the DB
 	const emptyDB = () => {
@@ -95,8 +99,8 @@ $(() => {
 	// adds click events on the buttons
 	const offline = document.getElementById('offline');
 	offline.addEventListener('click', loadOffline, false);
-	const ajax = document.getElementById('ajax');
-	ajax.addEventListener('click', loadAjax, false);
+	const json = document.getElementById('ajax');
+	json.addEventListener('click', loadJSON, false);
 	const deleteDB = document.getElementById('delete-db');
 	deleteDB.addEventListener('click', emptyDB, false);
 });

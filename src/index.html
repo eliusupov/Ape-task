@@ -6,12 +6,26 @@
 		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 	</head>
 	<body>
-		<div>
-			<button id="ajax" class="btn btn-outline-primary">From Ajax</button>
-			<button id="offline" class="btn btn-outline-primary">Offline</button>
-			<button id="delete-db" class="btn btn-outline-primary">Empty DB</button>
-			<h1>Image Gallery</h1>
-			<div id="image-list" class="container"></div>
+	<nav class="navbar navbar-dark bg-dark">
+		<a class="navbar-brand" href="/">Image Gallery</a>
+		<button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarsExample01" aria-controls="navbarsExample01" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div class="navbar-collapse collapse" id="navbarsExample01" style="">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item">
+					<a id="ajax" class="nav-link">From JSON</a>
+				</li>
+				<li class="nav-item">
+					<a id="offline" class="nav-link">From Local</a>
+				</li>
+				<li class="nav-item">
+					<a id="delete-db" class="nav-link" >Empty DB</a>
+				</li>
+			</ul>
 		</div>
+	</nav>
+	<div id="image-list" class="container"></div>
 	</body>
 </html>

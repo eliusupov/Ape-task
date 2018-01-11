@@ -15,7 +15,7 @@ import idb from 'idb';
 				return tx.complete;
 			})
 			.then(() => {
-				postMessage('added item to the Image OS!');
+				postMessage('added item to the Image ObjectStore!');
 			})
 			.catch((err) => {
 				postMessage('error');

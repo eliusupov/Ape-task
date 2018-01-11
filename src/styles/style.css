@@ -1,11 +1,10 @@
-@import 'btn.css';
+@import 'nav.css';
 @import 'container.css';
 @import 'img.css';
 @import 'header.css';
 
 body {
 	margin: 0;
-	text-align: center;
 	font-family: 'Roboto', sans-serif;
-	--main-color: #424242;
+	--main-color: #EE2E3D;
 }

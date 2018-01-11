@@ -1,0 +1,16 @@
+li {
+	cursor: pointer;
+}
+
+.bg-dark {
+	background-color: var(--main-color) !important;
+}
+
+.navbar-toggler {
+	padding: 0.25rem 0.75rem;
+	font-size: 1.25rem;
+	line-height: 1;
+	background-color: #D51E3D;
+	border: 1px solid #D51E3D;
+	border-radius: 0.25rem;
+}

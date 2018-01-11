@@ -52,7 +52,7 @@ module.exports = merge(common, {
 				use: {
 					loader: 'file-loader',
 					options: {
-						outputPath: 'assets/',
+						outputPath: '/',
 					},
 				},
 			},
