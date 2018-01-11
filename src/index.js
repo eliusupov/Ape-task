@@ -25,7 +25,7 @@ $(() => {
 			const image = `<img src="${data[i].low_resolution.url}"
 												style="background-color: ${data[i].prominentColor}"
                         data-src="${data[i].standard_resolution.url}"
-                        onclick="window.location = this.src"
+                        onclick="window.open(this.src)"
                         onload="this.src = this.dataset.src; this.removeAttribute('data-set');"
                         alt="image">`;
 			const imageList = document.getElementById('image-list');
