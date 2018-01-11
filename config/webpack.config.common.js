@@ -28,10 +28,6 @@ module.exports = {
 					options: { name: 'WorkerName.[hash].js' },
 				},
 			},
-			// {
-			// 	test: /\.json$/,
-			// 	loader: 'file-loader?name=[name].json',
-			// },
 		],
 	},
 	plugins: [

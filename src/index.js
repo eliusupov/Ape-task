@@ -26,7 +26,7 @@ $(() => {
 												style="background-color: ${data[i].prominentColor}"
                         data-src="${data[i].standard_resolution.url}"
                         onclick="window.open(this.src)"
-                        onload="this.src = this.dataset.src; this.removeAttribute('data-set');"
+                        onload="this.src = this.dataset.src;"
                         alt="image">`;
 			const imageList = document.getElementById('image-list');
 			const imgContainer = document.createElement('div');
@@ -52,10 +52,6 @@ $(() => {
 			throw new Error(err);
 		});
 	};
-	// const loadImages = (index, webWorker) => {
-	// 	imageCreator(index, json, webWorker);
-	// };
-	// gets data from db and sends to imageCreator function
 	const loadFromLocal = (index) => {
 		const dbPromise = idb.open('imagesDB', 1, () => {});
 		dbPromise.then((db) => {
@@ -95,6 +91,7 @@ $(() => {
 	// empties the DB
 	const emptyDB = () => {
 		idb.delete('imagesDB').then(() => console.log('done!'));
+		console.log('DB emptied');
 	};
 	// adds click events on the buttons
 	const offline = document.getElementById('offline');
