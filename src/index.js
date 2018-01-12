@@ -7,9 +7,14 @@ import './index.html';
 import './styles/style.css';
 import { debounce } from './helper';
 import Worker from './image.worker';
-import store from './components/store';
+
 
 $(() => {
+	// little store Obj
+	const store = {
+		indexValue: 0,
+		mode: null,
+	};
 	// web worker
 	const worker = new Worker();
 	// worker
@@ -17,7 +22,7 @@ $(() => {
 		console.log(e.data);
 	};
 	// creates images and appends to the DOM
-	const imageCreator = (index, data, webWorker) => {
+	const imageCreator = (index, data, flag) => {
 		for (let i = index; i < index + 15; i++) {
 			const image = `<img src="${data[i].low_resolution.url}"
 												class="animated fadeIn"
@@ -32,33 +37,33 @@ $(() => {
 			imgContainer.innerHTML = image;
 			imageList.appendChild(imgContainer);
 			store.indexValue += 1;
-			if (webWorker) {
+			if (flag !== 'json') {
 				worker.postMessage(data[i]);
 			}
 		}
 	};
 	// Loads the images from gallery-data.json
 	// gets index from store.indexValue and updates it
-	const loadImages = (index, webWorker) => {
+	const loadImages = () => {
 		const json = require('./gallery-data.json');
 		fetch(json)
 		.then(res => res.json())
 		.then((data) => {
-			imageCreator(index, data, webWorker);
+			imageCreator(store.indexValue, data);
 		})
 		.catch((err) => {
 			throw new Error(err);
 		});
 	};
-	const loadFromLocal = (index) => {
+	const loadFromLocal = () => {
 		const dbPromise = idb.open('imagesDB', 1, () => {});
 		dbPromise.then((db) => {
-			const tx = db.transaction('images', 'readwrite');
+			const tx = db.transaction('images', 'readonly');
 			const storeObj = tx.objectStore('images');
 			return storeObj.getAll();
 		})
 		.then((data) => {
-			imageCreator(index, data);
+			imageCreator(store.indexValue, data, 'json');
 		})
 		.catch(() => {
 			console.log('No more images load more from JSON');
@@ -67,32 +72,33 @@ $(() => {
 	// checks if the user scrolled down enough to load additional images
 	const viewport = () => {
 		const scrollBot = $(document).height() - $(window).height() - $(window).scrollTop();
-		if (scrollBot < 1000) {
-			if (store.mode === 'local') {
-				loadFromLocal(store.indexValue);
-			}
+		if (scrollBot < 1500) {
 			if (store.mode === 'json') {
-				loadImages(store.indexValue, worker);
+				loadImages();
+			}
+			if (store.mode === 'local') {
+				loadFromLocal();
 			}
 		}
 	};
 	// loads from DB instead of JSON
 	const loadOffline = () => {
 		document.getElementById('image-list').innerHTML = '';
-		store.mode = 'local';
 		store.indexValue = 0;
+		store.mode = 'local';
+		loadFromLocal();
 		$(window).scroll(debounce(viewport));
-		loadFromLocal(store.indexValue);
 	};
 	// loads from JSON request instead of db
 	const loadJSON = () => {
 		document.getElementById('image-list').innerHTML = '';
+		store.indexValue = 0;
 		store.mode = 'json';
+		loadImages();
 		$(window).scroll(debounce(viewport));
-		loadImages(store.indexValue, worker);
 	};
-	// empties the DB
-	const emptyDB = () => {
+	// clears the ObjectStore
+	const clearOS = () => {
 		document.getElementById('image-list').innerHTML = '';
 		const dbPromise = idb.open('imagesDB', 1, () => {});
 		dbPromise.then((db) => {
@@ -105,10 +111,7 @@ $(() => {
 		});
 	};
 	// adds click events on the buttons
-	const offline = document.getElementById('offline');
-	offline.addEventListener('click', loadOffline, false);
-	const json = document.getElementById('ajax');
-	json.addEventListener('click', loadJSON, false);
-	const deleteDB = document.getElementById('delete-db');
-	deleteDB.addEventListener('click', emptyDB, false);
+	document.getElementById('offline').addEventListener('click', loadOffline, false);
+	document.getElementById('ajax').addEventListener('click', loadJSON, false);
+	document.getElementById('delete-db').addEventListener('click', clearOS, false);
 });
