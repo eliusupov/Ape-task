@@ -1,18 +1,15 @@
 import $ from 'jquery';
 import idb from 'idb';
-import 'bootstrap';
-import './index.html';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
+import 'animate.css';
+import './index.html';
 import './styles/style.css';
 import { debounce } from './helper';
 import Worker from './image.worker';
+import store from './components/store';
 
 $(() => {
-	// little store Obj
-	const store = {
-		indexValue: 0,
-		mode: null,
-	};
 	// web worker
 	const worker = new Worker();
 	// worker
@@ -23,6 +20,7 @@ $(() => {
 	const imageCreator = (index, data, webWorker) => {
 		for (let i = index; i < index + 15; i++) {
 			const image = `<img src="${data[i].low_resolution.url}"
+												class="animated fadeIn"
 												style="background-color: ${data[i].prominentColor}"
                         data-src="${data[i].standard_resolution.url}"
                         onclick="window.open(this.src)"
@@ -55,12 +53,14 @@ $(() => {
 	const loadFromLocal = (index) => {
 		const dbPromise = idb.open('imagesDB', 1, () => {});
 		dbPromise.then((db) => {
-			const tx = db.transaction('images', 'readonly');
-			const store = tx.objectStore('images');
-			return store.getAll();
-		}).then((data) => {
+			const tx = db.transaction('images', 'readwrite');
+			const storeObj = tx.objectStore('images');
+			return storeObj.getAll();
+		})
+		.then((data) => {
 			imageCreator(index, data);
-		}).catch(() => {
+		})
+		.catch(() => {
 			console.log('No more images load more from JSON');
 		});
 	};
@@ -78,20 +78,31 @@ $(() => {
 	};
 	// loads from DB instead of JSON
 	const loadOffline = () => {
+		document.getElementById('image-list').innerHTML = '';
 		store.mode = 'local';
+		store.indexValue = 0;
 		$(window).scroll(debounce(viewport));
 		loadFromLocal(store.indexValue);
 	};
 	// loads from JSON request instead of db
 	const loadJSON = () => {
+		document.getElementById('image-list').innerHTML = '';
 		store.mode = 'json';
 		$(window).scroll(debounce(viewport));
 		loadImages(store.indexValue, worker);
 	};
 	// empties the DB
 	const emptyDB = () => {
-		idb.delete('imagesDB').then(() => console.log('done!'));
-		console.log('DB emptied');
+		document.getElementById('image-list').innerHTML = '';
+		const dbPromise = idb.open('imagesDB', 1, () => {});
+		dbPromise.then((db) => {
+			const tx = db.transaction('images', 'readwrite');
+			const store = tx.objectStore('images');
+			store.clear();
+			console.log('objectStore Cleared');
+		}).catch(() => {
+			console.log('No more images load more from JSON');
+		});
 	};
 	// adds click events on the buttons
 	const offline = document.getElementById('offline');
